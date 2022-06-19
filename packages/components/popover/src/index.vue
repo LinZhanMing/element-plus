@@ -42,8 +42,8 @@
     </template>
   </el-tooltip>
 </template>
-<script lang="ts">
-import { computed, defineComponent, ref, unref } from 'vue'
+<script lang="ts" setup>
+import { computed, ref, unref } from 'vue'
 import ElTooltip from '@element-plus/components/tooltip'
 import { isString } from '@element-plus/utils'
 import { useNamespace } from '@element-plus/hooks'
@@ -51,86 +51,80 @@ import { usePopoverProps } from './popover'
 
 import type { StyleValue } from 'vue'
 
-const emits = [
+const emit = defineEmits([
   'update:visible',
   'before-enter',
   'before-leave',
   'after-enter',
   'after-leave',
-]
+])
 
-const COMPONENT_NAME = 'ElPopover'
+const props = defineProps(usePopoverProps)
 
-export default defineComponent({
-  name: COMPONENT_NAME,
-  components: {
-    ElTooltip,
-  },
-  props: usePopoverProps,
-  emits,
-  setup(props, { emit }) {
-    const ns = useNamespace('popover')
-    const tooltipRef = ref<InstanceType<typeof ElTooltip> | null>(null)
-    const popperRef = computed(() => {
-      return unref(tooltipRef)?.popperRef
-    })
-    const width = computed(() => {
-      if (isString(props.width)) {
-        return props.width as string
-      }
-      return `${props.width}px`
-    })
+defineOptions({
+  name: 'ElPopover',
+})
 
-    const style = computed(() => {
-      return [
-        {
-          width: width.value,
-        },
-        props.popperStyle,
-      ] as StyleValue
-    })
+const ns = useNamespace('popover')
+const tooltipRef = ref<InstanceType<typeof ElTooltip> | null>(null)
+const popperRef = computed(() => {
+  return unref(tooltipRef)?.popperRef
+})
+const width = computed(() => {
+  if (isString(props.width)) {
+    return props.width as string
+  }
+  return `${props.width}px`
+})
 
-    const kls = computed(() => {
-      return [ns.b(), props.popperClass, { [ns.m('plain')]: !!props.content }]
-    })
+const style = computed(() => {
+  return [
+    {
+      width: width.value,
+    },
+    props.popperStyle,
+  ] as StyleValue
+})
 
-    const gpuAcceleration = computed(() => {
-      return props.transition === 'el-fade-in-linear'
-    })
+const kls = computed(() => {
+  return [ns.b(), props.popperClass, { [ns.m('plain')]: !!props.content }]
+})
 
-    const hide = () => {
-      tooltipRef.value?.hide()
-    }
+const gpuAcceleration = computed(() => {
+  return props.transition === 'el-fade-in-linear'
+})
 
-    const beforeEnter = () => {
-      emit('before-enter')
-    }
-    const beforeLeave = () => {
-      emit('before-leave')
-    }
+const hide = () => {
+  tooltipRef.value?.hide()
+}
 
-    const afterEnter = () => {
-      emit('after-enter')
-    }
+const beforeEnter = () => {
+  emit('before-enter')
+}
+const beforeLeave = () => {
+  emit('before-leave')
+}
 
-    const afterLeave = () => {
-      emit('update:visible', false)
-      emit('after-leave')
-    }
+const afterEnter = () => {
+  emit('after-enter')
+}
 
-    return {
-      ns,
-      kls,
-      gpuAcceleration,
-      style,
-      tooltipRef,
-      popperRef,
-      hide,
-      beforeEnter,
-      beforeLeave,
-      afterEnter,
-      afterLeave,
-    }
-  },
+const afterLeave = () => {
+  emit('update:visible', false)
+  emit('after-leave')
+}
+
+defineExpose({
+  ns,
+  kls,
+  gpuAcceleration,
+  style,
+  tooltipRef,
+  popperRef,
+  hide,
+  beforeEnter,
+  beforeLeave,
+  afterEnter,
+  afterLeave,
 })
 </script>
